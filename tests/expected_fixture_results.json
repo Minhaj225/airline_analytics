@@ -1,0 +1,66 @@
+{
+  "raw_records": 21,
+  "retained_records": 10,
+  "vertices": 5,
+  "directed_edges": 7,
+  "delay_observations": 7,
+  "sum_arrival_delay": 75.0,
+  "invalid_retained_delays": 1,
+  "exact_duplicate_records": 0,
+  "unknown_airline_records": 1,
+  "inactive_lookup_airports": 1,
+  "reasons": {
+    "corrupt": 1,
+    "invalid_date_or_flags": 4,
+    "cancelled_or_diverted": 2,
+    "numeric_airport": 1,
+    "malformed_airport": 1,
+    "self_loop": 1,
+    "unmatched_airport": 1,
+    "retained": 10
+  },
+  "ids": {
+    "ATL": 1,
+    "DFW": 2,
+    "JFK": 3,
+    "LAX": 4,
+    "ORD": 5
+  },
+  "routes": {
+    "ATL-ORD": [
+      4,
+      3,
+      35.0
+    ],
+    "ORD-DFW": [
+      1,
+      1,
+      -5.0
+    ],
+    "DFW-ATL": [
+      1,
+      1,
+      30.0
+    ],
+    "ORD-ATL": [
+      1,
+      1,
+      0.0
+    ],
+    "ATL-DFW": [
+      1,
+      0,
+      null
+    ],
+    "DFW-LAX": [
+      1,
+      0,
+      null
+    ],
+    "JFK-ATL": [
+      1,
+      1,
+      15.0
+    ]
+  }
+}

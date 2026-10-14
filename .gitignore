@@ -1,0 +1,16 @@
+config/project.env
+data/raw/
+data/exported/
+artifacts/
+.venv/
+__pycache__/
+*.pyc
+*.zip
+.sparkStaging/
+metastore_db/
+derby.log
+spark-warehouse/
+.runtime/
+guide.md
+plan.md
+READMEpersonal.md

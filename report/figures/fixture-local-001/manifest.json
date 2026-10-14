@@ -1,0 +1,46 @@
+{
+  "run_id": "fixture-local-001",
+  "mode": "fixture",
+  "figures": [
+    {
+      "file": "figures/fixture-local-001/cleaning.png",
+      "title": "Cleaning decisions and retained records",
+      "sha256": "6930f99605064918d2a8861a7dd094bbe4c60e00a7d0b50834d990a90c455d1e"
+    },
+    {
+      "file": "figures/fixture-local-001/monthly.png",
+      "title": "Monthly coverage, including invalid input dates",
+      "sha256": "e755a6c669d69f24139f01816533c0a611ad28bfd183880d58df50023f07a10a"
+    },
+    {
+      "file": "figures/fixture-local-001/pagerank.png",
+      "title": "Topology, traffic-weighted, and uniform PageRank",
+      "sha256": "1b253a88a9f624b84ecfbb2c2d807e3475a9aace60d4919f71664d6c9a3b1f4f"
+    },
+    {
+      "file": "figures/fixture-local-001/strength.png",
+      "title": "Incoming traffic and weighted centrality",
+      "sha256": "64b3af13623a57d4df53ba87452f894d5b3369ba748d3eae3a6e77d5f533b920"
+    },
+    {
+      "file": "figures/fixture-local-001/clustering.png",
+      "title": "Local clustering and weak connectivity",
+      "sha256": "1e916feecaa5806b2861ba5a9897d06734a06ce7acb2b4c70e5a83c8423b4b93"
+    },
+    {
+      "file": "figures/fixture-local-001/reachability.png",
+      "title": "Directed flight legs TO each landmark",
+      "sha256": "d64d5fe2bd68ba0cc316589c7f13ad68ff8c72d9748e77d243254cb792f06028"
+    },
+    {
+      "file": "figures/fixture-local-001/delay.png",
+      "title": "Route delays: at least 100 flights",
+      "sha256": "fa7cb8f95bf092971b9854959e63b0cbffec5fbdfe51ba633d3478a5f5260854"
+    },
+    {
+      "file": "figures/fixture-local-001/timings.png",
+      "title": "Measured pipeline durations",
+      "sha256": "6b743656d27271f02b3cc5193d206157028d351bc647b4a4ea19b4872b1eb210"
+    }
+  ]
+}

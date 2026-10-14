@@ -1,0 +1,71 @@
+{
+  "run_id": "fixture-hdfs-final-002",
+  "mode": "fixture",
+  "figures": [
+    {
+      "file": "figures/fixture-hdfs-final-002/cleaning.png",
+      "title": "Cleaning decisions and retained records",
+      "sha256": "662ac0a45a375be9be09f93faca4506c87118f1407da15c85d32c5bc260754a8"
+    },
+    {
+      "file": "figures/fixture-hdfs-final-002/monthly.png",
+      "title": "Monthly coverage, including invalid input dates",
+      "sha256": "eded23437eb45eb9c5d91344029769a89b0fd8fcfd9926d334cedc85fe0b2462"
+    },
+    {
+      "file": "figures/fixture-hdfs-final-002/pagerank.png",
+      "title": "Topology, traffic-weighted, and uniform PageRank",
+      "sha256": "9bc7bf9d8ebfb897f1b60f1018b0bd3ae444566885dcdfc75465acc321352375"
+    },
+    {
+      "file": "figures/fixture-hdfs-final-002/strength.png",
+      "title": "Incoming traffic and weighted centrality",
+      "sha256": "75cbcbe0ce23138c2bca4f42f01cdc0ae46c4ef4e0bdc5eb7380ab7b777b3634"
+    },
+    {
+      "file": "figures/fixture-hdfs-final-002/degree_distribution.png",
+      "title": "Distribution of distinct route connections",
+      "sha256": "225151ed1eebce72bbd6d65bd59876c2b277034c0443e012792ddd8b2a9fc01c"
+    },
+    {
+      "file": "figures/fixture-hdfs-final-002/traffic_distribution.png",
+      "title": "Distribution of airport flight traffic",
+      "sha256": "a564a4aeee2fa01f3d4e22c553ad6e6b00c36c6c41892d327f3fc2943f9ee84e"
+    },
+    {
+      "file": "figures/fixture-hdfs-final-002/clustering.png",
+      "title": "Local clustering and weak connectivity",
+      "sha256": "622444af58db445ec6b13db90ff349b45ca93f8b199263dcb0e3b10f258ef3c3"
+    },
+    {
+      "file": "figures/fixture-hdfs-final-002/component_sizes.png",
+      "title": "Weak component size distribution",
+      "sha256": "6ce17f43c8cefed38bc2c227537e9311c2c0faada84bc1020a757ccdbef2c07f"
+    },
+    {
+      "file": "figures/fixture-hdfs-final-002/triangles.png",
+      "title": "Airports with the most undirected triangles",
+      "sha256": "0ea0fe86f98733b5455652b78d6b99020679bcba97f4eb17786dbf13693c8141"
+    },
+    {
+      "file": "figures/fixture-hdfs-final-002/reachability.png",
+      "title": "Directed flight legs TO each landmark",
+      "sha256": "69ebc80f796ebcffc8807c4d1d7e0555d3aa94f77d4be4cab0ff67e368fcaeba"
+    },
+    {
+      "file": "figures/fixture-hdfs-final-002/delay.png",
+      "title": "Route delays: at least 100 flights",
+      "sha256": "a2a275ed27696e498548802ff2c0c7b2bb4ea8fab3add66bd560daf1c813bcef"
+    },
+    {
+      "file": "figures/fixture-hdfs-final-002/delay_centrality.png",
+      "title": "Airport centrality and observed arrival delay",
+      "sha256": "062902ee762b4d0466352caa64b321bffb58a7a2060a8c9ee4b4ba6ced99d47a"
+    },
+    {
+      "file": "figures/fixture-hdfs-final-002/timings.png",
+      "title": "Measured pipeline durations",
+      "sha256": "1dc8f97b6263d332dd307f957d48c940d08af8a68745363779ca4159b38369fd"
+    }
+  ]
+}

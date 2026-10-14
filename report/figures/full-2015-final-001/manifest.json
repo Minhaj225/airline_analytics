@@ -1,0 +1,71 @@
+{
+  "run_id": "full-2015-final-001",
+  "mode": "full",
+  "figures": [
+    {
+      "file": "figures/full-2015-final-001/cleaning.png",
+      "title": "Cleaning decisions and retained records",
+      "sha256": "caf9b45a533f5944be04993eeced2722228949d5e08009f80d789c2a12e5c2b2"
+    },
+    {
+      "file": "figures/full-2015-final-001/monthly.png",
+      "title": "Monthly retention and numeric-ID exclusions",
+      "sha256": "edff520f6813818f0ed00308db69d11acdf5bec910de51b0974263c2bfe9ca33"
+    },
+    {
+      "file": "figures/full-2015-final-001/pagerank.png",
+      "title": "Topology, traffic-weighted, and uniform PageRank",
+      "sha256": "9e1ea65ed70d3a826516d21b790c20b999e294af01a511096b0d31bcb8bc4cb6"
+    },
+    {
+      "file": "figures/full-2015-final-001/strength.png",
+      "title": "Incoming traffic and weighted centrality",
+      "sha256": "d4ac05674cd56cadc77804c267f4466d187dca80717c7bf3c16801d5b970e57b"
+    },
+    {
+      "file": "figures/full-2015-final-001/degree_distribution.png",
+      "title": "Distribution of distinct route connections",
+      "sha256": "c1cfc11bc9b07c930063feda06a4472f73a42b20349415ef3c0314f6061e89d5"
+    },
+    {
+      "file": "figures/full-2015-final-001/traffic_distribution.png",
+      "title": "Distribution of airport flight traffic",
+      "sha256": "3d7f2a089774ce973de6cc11d8efefb45b2969ae23bbe5c0e74acb0da7925141"
+    },
+    {
+      "file": "figures/full-2015-final-001/clustering.png",
+      "title": "Local clustering and weak connectivity",
+      "sha256": "3f9ad54eb3113ef5313853daefa5369cc5f0f81fd51465a6bbd48d6ebd2310dd"
+    },
+    {
+      "file": "figures/full-2015-final-001/component_sizes.png",
+      "title": "Weak component size distribution",
+      "sha256": "221359837570e823dac7062d9585f54c2be4176fbceae32c236569967984591e"
+    },
+    {
+      "file": "figures/full-2015-final-001/triangles.png",
+      "title": "Airports with the most undirected triangles",
+      "sha256": "fb02613097df7405fc8faa3357a7fdf5c54fa41398a1e37d744108ca3bf4d5b9"
+    },
+    {
+      "file": "figures/full-2015-final-001/reachability.png",
+      "title": "Directed flight legs TO each landmark",
+      "sha256": "e91041e9470d83bdfbb8e535794bde7742723c5d46737455b4b11ecce91846a4"
+    },
+    {
+      "file": "figures/full-2015-final-001/delay.png",
+      "title": "Route delays: at least 100 flights",
+      "sha256": "872113951ea58b944bf5861cc94396f6a651b83e18360bdd10f16a5a34058718"
+    },
+    {
+      "file": "figures/full-2015-final-001/delay_centrality.png",
+      "title": "Airport centrality and observed arrival delay",
+      "sha256": "0652cbe7548ef0ce860c3688c230383552558bec0ca9adb5dca73abc1405fcb2"
+    },
+    {
+      "file": "figures/full-2015-final-001/timings.png",
+      "title": "Measured pipeline durations",
+      "sha256": "f9a0ecbff92e725d1cce56ec605ee04e3062623eb6f7ea96e8958714f8656b58"
+    }
+  ]
+}

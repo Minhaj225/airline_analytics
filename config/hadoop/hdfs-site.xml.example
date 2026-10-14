@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!-- Never point an existing cluster at new storage as a troubleshooting shortcut. -->
+<configuration>
+  <property><name>dfs.replication</name><value>1</value></property>
+  <property><name>dfs.namenode.name.dir</name><value>file://${user.home}/airline-hadoop/namenode</value></property>
+  <property><name>dfs.datanode.data.dir</name><value>file://${user.home}/airline-hadoop/datanode</value></property>
+  <property><name>dfs.namenode.http-address</name><value>localhost:9870</value></property>
+</configuration>

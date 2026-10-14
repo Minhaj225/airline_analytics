@@ -1,0 +1,95 @@
+{
+  "dataset_id": "usdot-2015-v1",
+  "mode": "full",
+  "inspected_at": "2026-10-13T16:52:01.121476+00:00",
+  "source": "https://www.kaggle.com/datasets/usdot/flight-delays",
+  "publisher": "US Department of Transportation (Kaggle distribution)",
+  "redistribution": "Raw files excluded from submission. Check dataset terms before redistribution.",
+  "files": {
+    "flights.csv": {
+      "bytes": 592406591,
+      "sha256": "afa4e42188b113dd69427a3fbd00a4b6979c6235c866f963c2899d18a3403a83",
+      "columns": [
+        "YEAR",
+        "MONTH",
+        "DAY",
+        "DAY_OF_WEEK",
+        "AIRLINE",
+        "FLIGHT_NUMBER",
+        "TAIL_NUMBER",
+        "ORIGIN_AIRPORT",
+        "DESTINATION_AIRPORT",
+        "SCHEDULED_DEPARTURE",
+        "DEPARTURE_TIME",
+        "DEPARTURE_DELAY",
+        "TAXI_OUT",
+        "WHEELS_OFF",
+        "SCHEDULED_TIME",
+        "ELAPSED_TIME",
+        "AIR_TIME",
+        "DISTANCE",
+        "WHEELS_ON",
+        "TAXI_IN",
+        "SCHEDULED_ARRIVAL",
+        "ARRIVAL_TIME",
+        "ARRIVAL_DELAY",
+        "DIVERTED",
+        "CANCELLED",
+        "CANCELLATION_REASON",
+        "AIR_SYSTEM_DELAY",
+        "SECURITY_DELAY",
+        "AIRLINE_DELAY",
+        "LATE_AIRCRAFT_DELAY",
+        "WEATHER_DELAY"
+      ],
+      "parsed_records": 5819079,
+      "width_mismatches": 0
+    },
+    "airports.csv": {
+      "bytes": 23867,
+      "sha256": "23c4cea98c318225bd923b2068ead8af089845071f79fd9ea0037ba6a61cd4e2",
+      "columns": [
+        "IATA_CODE",
+        "AIRPORT",
+        "CITY",
+        "STATE",
+        "COUNTRY",
+        "LATITUDE",
+        "LONGITUDE"
+      ],
+      "parsed_records": 322,
+      "width_mismatches": 0
+    },
+    "airlines.csv": {
+      "bytes": 359,
+      "sha256": "ec54f453260c2a46fc76d497ab0eb0a4c13724b566fba8a7ce3bb8ad712acca3",
+      "columns": [
+        "IATA_CODE",
+        "AIRLINE"
+      ],
+      "parsed_records": 14,
+      "width_mismatches": 0
+    }
+  },
+  "provenance": {
+    "source_url": "https://www.kaggle.com/datasets/usdot/flight-delays",
+    "download_url": "https://www.kaggle.com/api/v1/datasets/download/usdot/flight-delays",
+    "metadata_url": "https://www.kaggle.com/api/v1/datasets/view/usdot/flight-delays",
+    "acquired_at": "2026-10-13T16:51:32.310626+00:00",
+    "inspected_at": "2026-10-13T16:51:50.431718+00:00",
+    "dataset_id": 810,
+    "dataset_version": 1,
+    "publisher": "Department of Transportation",
+    "source_last_updated": "2017-02-09T21:36:00.933Z",
+    "license": "CC0: Public Domain",
+    "license_url": "https://www.kaggle.com/datasets/usdot/flight-delays",
+    "archive_bytes": 200067268,
+    "archive_sha256": "112a41f4e1a5300f570fb0eec5ba5fd11965bcdf67be9431179bb011f3493c14",
+    "files_sha256": {
+      "flights.csv": "afa4e42188b113dd69427a3fbd00a4b6979c6235c866f963c2899d18a3403a83",
+      "airports.csv": "23c4cea98c318225bd923b2068ead8af089845071f79fd9ea0037ba6a61cd4e2",
+      "airlines.csv": "ec54f453260c2a46fc76d497ab0eb0a4c13724b566fba8a7ce3bb8ad712acca3"
+    },
+    "acquisition_method": "Public Kaggle download endpoint; no credentials required for this retrieval"
+  }
+}

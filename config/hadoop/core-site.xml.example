@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<!-- New installation only. Preserve an existing cluster's configuration. -->
+<configuration>
+  <property><name>fs.defaultFS</name><value>hdfs://localhost:9000</value></property>
+  <property><name>hadoop.tmp.dir</name><value>${user.home}/airline-hadoop/tmp</value></property>
+</configuration>

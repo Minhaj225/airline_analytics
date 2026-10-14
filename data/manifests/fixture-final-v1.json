@@ -1,0 +1,54 @@
+{
+  "dataset_id": "fixture-final-v1",
+  "mode": "fixture",
+  "inspected_at": "2026-10-13T16:51:46.544131+00:00",
+  "source": "synthetic correctness fixture",
+  "publisher": "project authors",
+  "redistribution": "Raw files excluded from submission. Check dataset terms before redistribution.",
+  "files": {
+    "flights.csv": {
+      "bytes": 858,
+      "sha256": "ea01640cf3a67b0f9140c5ecb3eac98987337e659377c12861c0cac21896456c",
+      "columns": [
+        "YEAR",
+        "MONTH",
+        "DAY",
+        "AIRLINE",
+        "FLIGHT_NUMBER",
+        "TAIL_NUMBER",
+        "ORIGIN_AIRPORT",
+        "DESTINATION_AIRPORT",
+        "ARRIVAL_DELAY",
+        "CANCELLED",
+        "DIVERTED"
+      ],
+      "parsed_records": 21,
+      "width_mismatches": 1
+    },
+    "airports.csv": {
+      "bytes": 269,
+      "sha256": "f62f429f771a58fe8c8af37ea346928175f98fd3fbb7b34bf79e96dd6d854db5",
+      "columns": [
+        "IATA_CODE",
+        "AIRPORT",
+        "CITY",
+        "STATE",
+        "COUNTRY",
+        "LATITUDE",
+        "LONGITUDE"
+      ],
+      "parsed_records": 6,
+      "width_mismatches": 0
+    },
+    "airlines.csv": {
+      "bytes": 37,
+      "sha256": "8493db4a1ad05edbcc9e735a8c6885792cf2fd7d05481de16913a41594e9d2a3",
+      "columns": [
+        "IATA_CODE",
+        "AIRLINE"
+      ],
+      "parsed_records": 1,
+      "width_mismatches": 0
+    }
+  }
+}

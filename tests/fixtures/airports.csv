@@ -1,0 +1,7 @@
+IATA_CODE,AIRPORT,CITY,STATE,COUNTRY,LATITUDE,LONGITUDE
+ATL,"Fixture, Atlanta",ATL,XX,USA,,
+DFW,Fixture Dallas,DFW,XX,USA,,
+ORD,Fixture Chicago,ORD,XX,USA,,
+LAX,Fixture Los Angeles,LAX,XX,USA,,
+JFK,Fixture New York,JFK,XX,USA,,
+BOS,Inactive Fixture,BOS,XX,USA,,

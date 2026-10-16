@@ -5,11 +5,13 @@ import statistics
 from collections import Counter
 
 
+# Load one bounded CSV export into memory for descriptive analysis.
 def rows(path):
     with path.open(newline='') as stream:
         return list(csv.DictReader(stream))
 
 
+# Assign average ranks to tied values before Spearman correlation.
 def average_ranks(values):
     ordered = sorted(range(len(values)), key=values.__getitem__)
     result = [0.0] * len(values)
@@ -24,12 +26,14 @@ def average_ranks(values):
     return result
 
 
+# Compute Pearson correlation directly or over average tied ranks.
 def correlation(x, y, ranks=False):
     if len(x) != len(y) or len(x) < 2 or len(set(x)) < 2 or len(set(y)) < 2:
         return None
     return statistics.correlation(average_ranks(x), average_ranks(y)) if ranks else statistics.correlation(x, y)
 
 
+# Combine validated exports into metrics consumed by reports and dashboards.
 def summarize(root, run_id):
     artifact, export = root / 'artifacts' / run_id, root / 'data/exported' / run_id
     def read_json(name):
@@ -37,6 +41,8 @@ def summarize(root, run_id):
         if value['run_id'] != run_id:
             raise ValueError('Mixed run IDs: ' + name)
         return value
+
+    # Load selected-run identity and result tables before deriving metrics.
     manifest = read_json('run_manifest.json')
     etl = read_json('etl.json')
     config = manifest['configuration']
@@ -122,6 +128,7 @@ def summarize(root, run_id):
     return metrics
 
 
+# Turn the numeric summary into careful, submission-ready findings prose.
 def findings(metrics):
     m = metrics
     synthetic = m['mode'] == 'fixture'

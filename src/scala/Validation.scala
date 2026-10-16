@@ -1,13 +1,19 @@
+/** Reloads persisted results and verifies conservation and graph invariants. */
 object Validation {
+  /** Execute all saved-output checks and fail if any invariant is false. */
   def run(spark: SparkSession, c: ProjectConfig): Unit = {
     import spark.implicits._
     val checks = scala.collection.mutable.ArrayBuffer.empty[(String, Boolean, String)]
     def check(name: String, passed: Boolean, observed: Any): Unit = checks += ((name, passed, observed.toString))
     def read(path: String): DataFrame = spark.read.parquet(s"${c.run}/$path")
     def total(df: DataFrame, column: String): Double = Option(df.agg(sum(column)).first().get(0)).map(_.toString.toDouble).getOrElse(0.0)
+
+    // Reload persisted tables so checks cover the storage boundary, not cached state.
     val v = read("clean/vertices"); val e = read("clean/edges")
     val n = v.count(); val m = e.count()
     val etl = spark.read.json(Seq(Output.readJson(spark, s"${c.run}/metrics/etl.json")).toDS()).first()
+
+    // Verify graph shape, stable identifiers, and conserved traffic and delay totals.
     check("nonempty_graph", n > 0 && m > 0, s"vertices=$n edges=$m")
     check("unique_vertices", v.select("vertex_id").distinct().count() == n && v.select("iata").distinct().count() == n, n)
     val mapping = v.select("vertex_id", "iata").as[(Long, String)].collect().sortBy(_._2)
@@ -24,6 +30,8 @@ object Validation {
       (col("delay_observations") > 0 && (col("avg_arrival_delay").isNull || col("sum_arrival_delay").isNull ||
         abs(col("avg_arrival_delay") * col("delay_observations") - col("sum_arrival_delay")) > 1e-6))).count() == 0, m)
     check("cleaning_funnel", total(read("audit/cleaning_funnel"), "records") == etl.getAs[Long]("raw_records"), etl.getAs[Long]("raw_records"))
+
+    // Apply common score checks to every ranking and convergence checks to custom runs.
     for (name <- Seq("pagerank", "weighted_pagerank", "uniform_pagerank")) {
       val scores = read(s"results/$name")
       val values = scores.select("score").as[Double].collect()
@@ -35,6 +43,7 @@ object Validation {
         check(s"${name}_converged", info.getAs[Boolean]("converged"), info.getAs[Double]("residual"))
       }
     }
+    // Validate connectivity, triangle, path, and aggregate result semantics.
     val components = read("results/connected_components")
     check("component_membership", components.count() == n && components.select("vertex_id").distinct().count() == n &&
       total(read("results/component_sizes"), "airports") == n, components.count())
@@ -56,6 +65,7 @@ object Validation {
     check("monthly_conservation", total(monthly, "raw_records") == etl.getAs[Long]("raw_records") && total(monthly, "retained_records") == etl.getAs[Long]("retained_records"), total(monthly, "raw_records"))
     val observedSizes = components.groupBy("component_id").agg(count(lit(1)).as("airports"))
     check("component_sizes_match_membership", observedSizes.except(read("results/component_sizes")).count() == 0 && read("results/component_sizes").except(observedSizes).count() == 0, observedSizes.count())
+    // Persist the complete check list before converting any failure into a stage error.
     val passed = checks.forall(_._2)
     val rows = checks.toSeq.toDF("check", "passed", "observed")
     val json = rows.toJSON.collect().mkString(",")

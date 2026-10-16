@@ -9,10 +9,14 @@ version=$("$jdk/bin/java" -version 2>&1)
 hadoop_home=$(dirname "$(dirname "$(readlink -f "$(command -v hadoop)")")")
 spark_home=$(dirname "$(dirname "$(readlink -f "$(command -v spark-shell)")")")
 spark_java=$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")
+
+# Store a recoverable copy of the only external configuration file being changed.
 evidence="$root/artifacts/setup-completion"
 mkdir -p "$evidence"
 python3 - "$root" "$jdk" "$hadoop_home" "$spark_home" "$spark_java" <<'PY'
 import pathlib, re, shlex, sys
+
+# Refuse ambiguous or repeated configuration before writing either file.
 root, jdk, hadoop, spark, java = sys.argv[1:]
 root = pathlib.Path(root)
 config = root / 'config/project.env'
@@ -29,6 +33,8 @@ if len(assignments) != 1:
 match = assignments[0]
 updated = text[:match.start()] + 'export JAVA_HOME=' + shlex.quote(jdk) + text[match.end():]
 path.write_text(updated)
+
+# Persist explicit runtime paths for repeatable shell entry points.
 values = dict(JAVA_HOME=java, HADOOP_JAVA_HOME=jdk, HADOOP_HOME=hadoop,
               SPARK_HOME=spark, HADOOP_CONF_DIR=str(path.parent))
 config.write_text('\n'.join(k + '=' + shlex.quote(v) for k, v in values.items()) + '\n' +

@@ -1,16 +1,23 @@
 import org.apache.spark.graphx.lib.{TriangleCount, ShortestPaths}
 
+/** Runs centrality, connectivity, triangle, reachability, and delay analyses. */
+
 object GraphAnalytics {
+  /** Convert directed routes into one canonical edge per unordered airport pair. */
   def projection(graph: Graph[String, Double], partitions: Int): Graph[String, Int] = {
     val pairs = graph.edges.filter(e => e.srcId != e.dstId)
       .map(e => (math.min(e.srcId, e.dstId), math.max(e.srcId, e.dstId))).distinct()
     Graph(graph.vertices, pairs.map { case (a, b) => Edge(a, b, 1) }, "")
       .partitionBy(PartitionStrategy.EdgePartition2D, partitions)
   }
+
+  /** Reload clean graph tables, execute analyses, and persist timed outputs. */
   def run(spark: SparkSession, c: ProjectConfig): Unit = {
     import spark.implicits._
     val vertices = spark.read.parquet(s"${c.run}/clean/vertices").cache()
     val edges = spark.read.parquet(s"${c.run}/clean/edges").cache()
+
+    // Reject unresolved endpoints before constructing the GraphX graph.
     require(edges.join(vertices, edges("src_id") === vertices("vertex_id"), "left_anti").count() == 0 &&
       edges.join(vertices, edges("dst_id") === vertices("vertex_id"), "left_anti").count() == 0, "Unknown edge endpoint")
     val graph = Graph(vertices.select("vertex_id", "iata").as[(Long, String)].rdd,
@@ -19,6 +26,8 @@ object GraphAnalytics {
       .partitionBy(PartitionStrategy.EdgePartition2D, c.graphPartitions).cache()
     graph.vertices.count(); graph.edges.count()
     val timings = scala.collection.mutable.ArrayBuffer.empty[(String, Double, Double)]
+
+    // Materialize each result before separating compute time from write time.
     def save(name: String)(compute: => DataFrame): Unit = {
       val start = System.nanoTime()
       val result = compute.cache()
@@ -28,12 +37,16 @@ object GraphAnalytics {
       timings += ((name, (computed - start) / 1e9, (System.nanoTime() - computed) / 1e9))
       result.unpersist()
     }
+
+    // Normalize score mass and apply deterministic IATA tie-breaking.
     def ranks(scores: DataFrame): DataFrame = {
       val total = scores.agg(sum("score")).first().getDouble(0)
       scores.join(vertices.select("vertex_id", "iata"), Seq("vertex_id"))
         .withColumn("normalized_score", col("score") / total)
         .withColumn("rank", row_number().over(Window.orderBy(col("score").desc, col("iata"))))
     }
+
+    // Run the built-in topology baseline and two custom comparable variants.
     save("pagerank") {
       val result = graph.staticPageRank(c.baselineIterations, c.alpha)
       ranks(result.vertices.toDF("vertex_id", "score"))
@@ -47,6 +60,8 @@ object GraphAnalytics {
         s"""{"run_id":"${c.runId}","iterations":${result.iterations},"residual":${result.residual},"converged":${result.converged},"score_sum":${result.mass},"compute_seconds":$seconds}""")
       result.graph.unpersistVertices(false)
     }
+
+    // Measure weak connectivity on the directed graph's undirected interpretation.
     save("connected_components") {
       graph.connectedComponents().vertices.toDF("vertex_id", "component_id")
         .join(vertices.select("vertex_id", "iata"), Seq("vertex_id"))
@@ -55,6 +70,8 @@ object GraphAnalytics {
       spark.read.parquet(s"${c.run}/results/connected_components").groupBy("component_id")
         .agg(count(lit(1)).as("airports"))
     }
+
+    // TriangleCount requires a simple, canonicalized undirected projection.
     val undirected = projection(graph, c.graphPartitions).cache()
     save("triangle_count") {
       val triangles = TriangleCount.runPreCanonicalized(undirected).vertices.toDF("vertex_id", "triangles")
@@ -64,6 +81,8 @@ object GraphAnalytics {
         .withColumn("clustering", when(col("undirected_degree") < 2, 0.0)
           .otherwise(col("triangles") * 2.0 / (col("undirected_degree").cast("double") * (col("undirected_degree") - 1))))
     }
+
+    // Resolve named landmarks once, then preserve explicit unreachable entries.
     val labels = vertices.select("vertex_id", "iata").as[(Long, String)].collect().toMap
     val landmarks = c.landmarks.map(code => labels.find(_._2 == code).map(_._1)
       .getOrElse(throw new IllegalArgumentException(s"Required landmark missing: $code")))
@@ -74,6 +93,8 @@ object GraphAnalytics {
         .join(vertices.select("vertex_id", "iata"), Seq("vertex_id"))
         .join(vertices.select(col("vertex_id").as("landmark_id"), col("iata").as("landmark_iata")), Seq("landmark_id"))
     }
+
+    // Aggregate traffic and observed delays independently at airport level.
     save("airport_metrics") {
       val incoming = edges.groupBy(col("dst_id").as("vertex_id")).agg(count(lit(1)).as("in_degree"),
         sum("num_flights").as("in_strength"), sum("delay_observations").as("arrival_delay_observations"),
@@ -84,6 +105,8 @@ object GraphAnalytics {
         .withColumn("avg_arrival_delay", when(col("arrival_delay_observations") > 0, col("arrival_delay_sum") / col("arrival_delay_observations")))
     }
     save("route_metrics") { edges.withColumn("delayed_fraction", when(col("delay_observations") > 0, col("delayed_flights_15min") / col("delay_observations"))) }
+
+    // Persist timings and release every cached dataset and graph.
     Output.table(timings.toSeq.toDF("algorithm", "materialize_seconds", "write_seconds"), c, "metrics/algorithm_timings")
     undirected.unpersist(); graph.unpersist(); vertices.unpersist(); edges.unpersist()
   }

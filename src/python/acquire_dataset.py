@@ -13,11 +13,13 @@ METADATA = 'https://www.kaggle.com/api/v1/datasets/view/usdot/flight-delays'
 FILES = ('flights.csv', 'airports.csv', 'airlines.csv')
 
 
+# Compute file identity without loading large artifacts into memory.
 def digest(path):
     with path.open('rb') as stream:
         return hashlib.file_digest(stream, 'sha256').hexdigest()
 
 
+# Download or reuse the archive, validate its identity, and extract allowlisted files.
 def acquire(directory, existing_archive=False, metadata_file=None):
     directory.mkdir(parents=True, exist_ok=True)
     if any((directory / name).exists() for name in FILES):
@@ -33,6 +35,8 @@ def acquire(directory, existing_archive=False, metadata_file=None):
     metadata = json.loads(metadata_file.read_text())
     if metadata.get('id') != 810 or metadata.get('ref') != 'usdot/flight-delays':
         raise ValueError('Unexpected dataset identity')
+
+    # Validate archive membership and CRC before creating any CSV output.
     with zipfile.ZipFile(archive) as bundle:
         if set(bundle.namelist()) != set(FILES):
             raise ValueError('Unexpected archive inventory; inspect before extraction')
@@ -42,6 +46,8 @@ def acquire(directory, existing_archive=False, metadata_file=None):
             with bundle.open(name) as source, (directory / name).open('xb') as out:
                 while chunk := source.read(1024 * 1024):
                     out.write(chunk)
+
+    # Preserve source, license, version, timestamps, sizes, and hashes together.
     provenance = dict(source_url=SOURCE, download_url=DOWNLOAD, metadata_url=METADATA,
         acquired_at=datetime.fromtimestamp(archive.stat().st_mtime, timezone.utc).isoformat(),
         inspected_at=datetime.now(timezone.utc).isoformat(), dataset_id=810,

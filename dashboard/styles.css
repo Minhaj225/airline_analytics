@@ -1,3 +1,4 @@
+/* Shared palette, surfaces, typography, and sizing tokens. */
 :root {
   color-scheme: light dark;
   --bg: #f1f4f3;
@@ -15,12 +16,14 @@
   font-family: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
 }
 
+/* Baseline layout and browser-normalization rules. */
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body { margin: 0; background: var(--bg); color: var(--text); }
 a { color: inherit; }
 button, input, table { font: inherit; }
 
+/* Accessibility and persistent application chrome. */
 .skip-link {
   position: fixed; left: 1rem; top: -5rem; z-index: 20;
   background: var(--text); color: var(--surface); padding: .75rem 1rem; border-radius: 8px;
@@ -44,6 +47,7 @@ button, input, table { font: inherit; }
 .run-state { display: flex; align-items: center; gap: 8px; color: var(--muted); font: 600 12px/1.2 ui-monospace, monospace; }
 .status-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
 
+/* Two-column shell with sticky section navigation. */
 .shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); max-width: 1500px; margin: 0 auto; }
 .sidebar {
   position: sticky; top: 72px; height: calc(100dvh - 72px); padding: 32px 24px;
@@ -56,6 +60,7 @@ button, input, table { font: inherit; }
 .sidebar-note span, .sidebar-note small { color: var(--muted); font-size: 11px; }
 .sidebar-note strong { overflow-wrap: anywhere; font: 600 12px/1.45 ui-monospace, monospace; }
 
+/* Main report sections, typography, and overview cards. */
 main { min-width: 0; padding: 0 48px; }
 .section { padding: 78px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 70px; }
 .intro { min-height: 430px; display: grid; grid-template-columns: 1.4fr .7fr; gap: 72px; align-items: center; }
@@ -78,6 +83,7 @@ p { color: var(--muted); line-height: 1.7; }
 .metric-grid span, .metric-grid small { display: block; color: var(--muted); font-size: 11px; }
 .metric-grid strong { display: block; margin: 12px 0 8px; font: 650 clamp(26px, 3vw, 42px)/1 ui-monospace, monospace; letter-spacing: -.06em; }
 
+/* Reusable panels and two-column analytical layouts. */
 .two-column { display: grid; grid-template-columns: minmax(0, .82fr) minmax(480px, 1.18fr); gap: 64px; align-items: start; }
 .section-heading { display: grid; justify-items: start; margin-bottom: 32px; }
 .section-heading p:last-child { max-width: 680px; margin-bottom: 0; }
@@ -95,6 +101,7 @@ p { color: var(--muted); line-height: 1.7; }
 .funnel-row.major strong { color: var(--danger); }
 .funnel-row.retained strong { color: var(--accent); }
 
+/* Compact CSS-rendered charts and result tables. */
 .monthly-chart { height: 330px; padding: 28px 24px 18px; display: grid; grid-template-columns: repeat(12, 1fr); gap: 8px; align-items: end; }
 .month { height: 100%; min-width: 0; display: grid; grid-template-rows: 1fr auto; gap: 10px; align-items: end; }
 .month-bars { height: 100%; display: flex; gap: 3px; align-items: end; justify-content: center; }

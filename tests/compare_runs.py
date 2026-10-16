@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+# Compare non-timing tables after proving inputs, parameters, and source match.
 def compare(left, right):
     left_root = ROOT / 'data/exported' / left
     right_root = ROOT / 'data/exported' / right
@@ -20,6 +21,8 @@ def compare(left, right):
     configs = [{k: v for k, v in m['configuration'].items() if k not in ignore} for m in manifests]
     if configs[0] != configs[1] or manifests[0].get('algorithm_source_sha256') != manifests[1].get('algorithm_source_sha256'):
         raise ValueError('Repeatability requires identical configuration and algorithm source')
+
+    # Metrics contain timing noise, so compare deterministic result tables only.
     tables = lambda root: {p.relative_to(root) for p in root.rglob('*.csv') if p.relative_to(root).parts[0] != 'metrics'}
     if tables(left_root) != tables(right_root) or not tables(left_root):
         raise ValueError('Export table inventories differ or are empty')
@@ -28,6 +31,8 @@ def compare(left, right):
         relative = path.relative_to(left_root)
         if relative.parts[0] == 'metrics':
             continue
+
+        # Sort by stable identifier columns before comparing multipart exports.
         other = right_root / relative
         with path.open(newline='') as stream, other.open(newline='') as second:
             rows, rows2 = list(csv.DictReader(stream)), list(csv.DictReader(second))
@@ -41,6 +46,7 @@ def compare(left, right):
                 raise AssertionError(f'{relative}: schema changed')
             for key in a:
                 if a[key] != b[key]:
+                    # Permit only the documented numerical tolerance.
                     try:
                         same = math.isclose(float(a[key]), float(b[key]), rel_tol=1e-8, abs_tol=1e-8)
                     except ValueError:

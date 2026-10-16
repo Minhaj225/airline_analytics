@@ -11,11 +11,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 
+# Read a compact exported table as dictionaries for independent validation.
 def read_csv(path):
     with path.open(newline='') as stream:
         return list(csv.DictReader(stream))
 
 
+# Recompute PageRank with a dense matrix, independently from the GraphX code.
 def power_iteration(ids, edges, alpha=0.15, tolerance=1e-13):
     """Independent dense transition matrix including dangling columns."""
     n = len(ids)
@@ -38,6 +40,7 @@ def power_iteration(ids, edges, alpha=0.15, tolerance=1e-13):
     raise ValueError('Independent PageRank oracle failed to converge')
 
 
+# Traverse reversed edges so distances represent paths toward the landmark.
 def distances_to(ids, edges, landmark):
     reverse = {v: [] for v in ids}
     for src, dst, _ in edges:
@@ -53,6 +56,7 @@ def distances_to(ids, edges, landmark):
     return result
 
 
+# Compare fixture exports against known values and independent graph oracles.
 def fixture_checks(export, artifact, config, check):
     expected = json.loads((ROOT / 'tests/expected_fixture_results.json').read_text())
     etl = json.loads((artifact / 'etl.json').read_text())
@@ -99,6 +103,7 @@ def fixture_checks(export, artifact, config, check):
         check(name + '_matrix_oracle', difference < 1e-8, difference)
 
 
+# Validate one selected export and write its analysis and narrative findings.
 def analyze(run_id):
     artifact = ROOT / 'artifacts' / run_id
     export = ROOT / 'data/exported' / run_id
@@ -118,6 +123,7 @@ def analyze(run_id):
         raise ValueError('Export manifest is missing required tables')
     checks = []
 
+    # Store every check with its observed value for auditability.
     def check(name, passed, observed):
         checks.append(dict(check=name, passed=bool(passed), observed=observed))
 
@@ -126,6 +132,8 @@ def analyze(run_id):
     check('scala_saved_output_validation', validation['passed'], len(validation['checks']))
     if manifest['configuration']['MODE'] == 'fixture':
         fixture_checks(export, artifact, manifest['configuration'], check)
+
+    # Compare deterministic ranking positions after integrity checks pass.
     ranks = {name: read_csv(export / f'results/{name}.csv') for name in ('pagerank', 'weighted_pagerank', 'uniform_pagerank')}
     baseline = {r['iata']: int(r['rank']) for r in ranks['pagerank']}
     weighted = {r['iata']: int(r['rank']) for r in ranks['weighted_pagerank']}
@@ -140,6 +148,8 @@ def analyze(run_id):
     (artifact / 'analysis.json').write_text(json.dumps(result, indent=2, allow_nan=False) + '\n')
     if not result['passed']:
         raise ValueError('Failed checks: ' + ', '.join(c['check'] for c in checks if not c['passed']))
+
+    # Build the richer metrics and prose summaries from the validated tables.
     from summarize_results import summarize, findings
     metrics = summarize(ROOT, run_id)
     (artifact / 'findings.md').write_text(findings(metrics))

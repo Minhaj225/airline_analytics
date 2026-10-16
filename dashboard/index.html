@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Document metadata and local, dependency-free assets. -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
@@ -11,7 +12,10 @@
     <script src="app.js" defer></script>
   </head>
   <body>
+    <!-- Keyboard users can bypass repeated navigation. -->
     <a class="skip-link" href="#main">Skip to results</a>
+
+    <!-- Global identity and selected-run validation state. -->
     <header class="topbar">
       <div class="brand">
         <span class="brand-mark" aria-hidden="true">AG</span>
@@ -27,6 +31,7 @@
     </header>
 
     <div class="shell">
+      <!-- Persistent section navigation and run identity. -->
       <aside class="sidebar" aria-label="Dashboard sections">
         <nav>
           <a class="active" href="#overview">Overview</a>
@@ -46,6 +51,7 @@
       </aside>
 
       <main id="main">
+        <!-- Overview and core pipeline scale. -->
         <section id="overview" class="section intro">
           <div class="intro-copy">
             <p class="eyebrow">Validated real-data run</p>
@@ -67,6 +73,7 @@
           <article><span>Routes</span><strong id="routes">...</strong><small>directed edges</small></article>
         </section>
 
+        <!-- Cleaning decisions and month-level coverage. -->
         <section id="cleaning" class="section two-column">
           <div>
             <p class="section-index">Data quality</p>

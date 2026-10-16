@@ -1,7 +1,9 @@
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.expressions.Window
 
+/** Parses, audits, cleans, and aggregates the raw airline CSV files. */
 object Preprocess {
+  /** Read a CSV with a complete string schema so corrupt rows remain observable. */
   def csv(spark: SparkSession, path: String, required: Seq[String]): DataFrame = {
     val header = spark.read.option("header", "true").csv(path).columns.toSeq
     require(required.forall(header.contains) && header.distinct.size == header.size,
@@ -11,9 +13,13 @@ object Preprocess {
     spark.read.schema(schema).option("header", "true").option("mode", "PERMISSIVE")
       .option("columnNameOfCorruptRecord", "_corrupt_record").csv(path)
   }
+
+  /** Produce validated vertices, edges, cleaning audits, and coverage metrics. */
   def run(spark: SparkSession, c: ProjectConfig): Unit = {
     import spark.implicits._
     spark.conf.set("spark.sql.csv.parser.columnPruning.enabled", "false")
+
+    // Validate lookup keys before joining so malformed metadata cannot multiply rows.
     val airports = csv(spark, s"${c.raw}/airports.csv",
       Seq("IATA_CODE", "AIRPORT", "CITY", "STATE", "COUNTRY", "LATITUDE", "LONGITUDE"))
       .withColumn("IATA_CODE", upper(trim(col("IATA_CODE")))).cache()
@@ -26,6 +32,8 @@ object Preprocess {
     airlines.count()
     require(airlines.filter(col("IATA_CODE").isNull || col("_corrupt_record").isNotNull).count() == 0 &&
       airlines.groupBy("IATA_CODE").count().filter(col("count") > 1).count() == 0, "Invalid airline lookup")
+
+    // Keep flight fields as strings until every parsing decision is audited.
     val raw = csv(spark, s"${c.raw}/flights.csv", Seq("YEAR", "MONTH", "DAY", "AIRLINE", "FLIGHT_NUMBER",
       "TAIL_NUMBER", "ORIGIN_AIRPORT", "DESTINATION_AIRPORT", "ARRIVAL_DELAY", "CANCELLED", "DIVERTED")).cache()
     val rawCount = raw.count()
@@ -44,6 +52,8 @@ object Preprocess {
       coalesce(col("CANCELLED").isin("0", "1") && col("DIVERTED").isin("0", "1"), lit(false))
     val iata = coalesce(col("origin_iata").rlike("^[A-Z]{3}$") && col("destination_iata").rlike("^[A-Z]{3}$"), lit(false))
     val numeric = coalesce(col("origin_iata").rlike("^[0-9]+$") || col("destination_iata").rlike("^[0-9]+$"), lit(false))
+
+    // This ordered chain assigns exactly one exclusive outcome to every row.
     val audited = prepared.withColumn("reason",
       when(col("_corrupt_record").isNotNull, "corrupt")
         .when(!dateFlags, "invalid_date_or_flags")
@@ -58,6 +68,8 @@ object Preprocess {
       "malformed_airport", "self_loop", "unmatched_airport", "retained")
     val reasonCounts = audited.groupBy("reason").count().as[(String, Long)].collect().toMap
     var remaining = rawCount
+
+    // Record the cumulative cleaning funnel and monthly coverage effect.
     val funnel = reasons.zipWithIndex.map { case (reason, index) =>
       val n = reasonCounts.getOrElse(reason, 0L)
       if (reason != "retained") remaining -= n
@@ -75,6 +87,8 @@ object Preprocess {
     val active = retained.select(col("origin_iata").as("iata"))
       .union(retained.select(col("destination_iata").as("iata"))).distinct()
     require(active.count() <= 10000, "Airport mapping exceeds bounded mapping limit")
+
+    // Lexical IATA ordering makes vertex IDs stable across equivalent runs.
     val vertices = active.withColumn("vertex_id", row_number().over(Window.orderBy("iata")).cast(LongType))
       .join(airports, col("iata") === col("IATA_CODE"))
       .select(col("vertex_id"), col("iata"), col("AIRPORT").as("airport_name"), col("CITY").as("city"),
@@ -86,6 +100,8 @@ object Preprocess {
       sum(when(col("delay") >= 15.0, 1L).otherwise(0L)).as("delayed_flights_15min"))
     val edges = routes.join(vertices.select(col("iata").as("origin_iata"), col("vertex_id").as("src_id")), Seq("origin_iata"))
       .join(vertices.select(col("iata").as("destination_iata"), col("vertex_id").as("dst_id")), Seq("destination_iata")).cache()
+
+    // Persist the graph tables before deriving final diagnostic metrics.
     Output.table(vertices, c, "clean/vertices")
     Output.table(edges, c, "clean/edges")
     val sums = retained.agg(count(col("delay")), sum("delay")).first()
@@ -96,10 +112,14 @@ object Preprocess {
     val missingCoordinates = vertices.filter(col("latitude").isNull || col("longitude").isNull || isnan(col("latitude")) || isnan(col("longitude"))).count()
     val missingNames = vertices.filter(col("airport_name").isNull || length(trim(col("airport_name"))) === 0).count()
     val undirectedEdges = edges.select(least(col("src_id"), col("dst_id")).as("a"), greatest(col("src_id"), col("dst_id")).as("b")).distinct().count()
+
+    // Save compact summaries consumed by validation, figures, and reports.
     Output.json(spark, s"${c.run}/metrics/coverage.json",
       s"""{"run_id":"${c.runId}","active_airports_missing_coordinates":$missingCoordinates,"active_airports_missing_names":$missingNames,"undirected_edges":$undirectedEdges}""")
     Output.json(spark, s"${c.run}/metrics/etl.json",
       s"""{"run_id":"${c.runId}","raw_records":$rawCount,"retained_records":$retainedCount,"vertices":${vertices.count()},"directed_edges":${edges.count()},"delay_observations":${sums.getLong(0)},"sum_arrival_delay":$delaySum,"invalid_retained_delays":$invalidDelays,"exact_duplicate_records":$duplicates,"unknown_airline_records":$unknownAirlines,"inactive_lookup_airports":${airports.count() - vertices.count()}}""")
+
+    // Release cached inputs and intermediates after every output is materialized.
     Seq(raw, audited, retained, vertices, edges, airports, airlines).foreach(_.unpersist())
   }
 }

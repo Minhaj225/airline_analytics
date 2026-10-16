@@ -14,6 +14,7 @@ REQUIRED = {
 }
 
 
+# Inspect headers, row widths, record counts, bytes, and hashes in one stream.
 def inspect(directory):
     files = {}
     for name, required in REQUIRED.items():
@@ -29,11 +30,14 @@ def inspect(directory):
             for row in reader:
                 count += 1
                 corrupt += len(row) != len(header)
+
+        # Keep only bounded file-level facts; input rows are never retained here.
         files[path.name] = dict(bytes=path.stat().st_size, sha256=digest,
                                 columns=header, parsed_records=count, width_mismatches=corrupt)
     return files
 
 
+# Write or compare the stable manifest assigned to one dataset identifier.
 def main():
     if len(sys.argv) == 3 and sys.argv[1] == '--compare':
         remote = json.load(sys.stdin)
@@ -49,6 +53,8 @@ def main():
                     publisher='project authors' if mode == 'fixture' else 'US Department of Transportation (Kaggle distribution)',
                     redistribution='Raw files excluded from submission. Check dataset terms before redistribution.',
                     files=inspect(Path(os.environ['DATA_DIR'])))
+
+    # Full runs require acquisition provenance whose file hashes still match.
     if mode == 'full':
         provenance_file = Path(os.environ['DATA_DIR']) / 'provenance.json'
         if not provenance_file.exists():
@@ -59,6 +65,8 @@ def main():
         manifest['provenance'] = provenance
     target = root / 'data/manifests' / f"{manifest['dataset_id']}.json"
     target.parent.mkdir(parents=True, exist_ok=True)
+
+    # A dataset ID is immutable once it has been associated with input bytes.
     if target.exists():
         previous = json.loads(target.read_text())
         if (previous['mode'], previous['files'], previous.get('provenance')) != (mode, manifest['files'], manifest.get('provenance')):

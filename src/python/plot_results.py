@@ -13,6 +13,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
+# Render all selected-run figures and bind them to source-table hashes.
 def plot(run_id):
     analyze(run_id)
     artifact = ROOT / 'artifacts' / run_id
@@ -28,6 +29,7 @@ def plot(run_id):
     color = '#176b87'
     qualifier = 'SYNTHETIC FIXTURE' if config['MODE'] == 'fixture' else 'RETAINED 2015 FLIGHTS'
 
+    # Apply a shared layout, provenance label, and deterministic output manifest.
     def figure(name, title, draw):
         fig, ax = plt.subplots(figsize=(10, 5.8))
         draw(ax)
@@ -40,6 +42,7 @@ def plot(run_id):
         figures.append(dict(file=str(path.relative_to(ROOT / 'report')), title=title,
                             sha256=hashlib.sha256(path.read_bytes()).hexdigest()))
 
+    # Each drawing below answers one report question from validated aggregates.
     funnel = sorted(read_csv(export / 'audit/cleaning_funnel.csv'), key=lambda r: int(r['step']))
     def cleaning(ax):
         ax.barh([r['reason'].replace('_', ' ') for r in funnel][::-1], [int(r['records']) for r in funnel][::-1], color=color)

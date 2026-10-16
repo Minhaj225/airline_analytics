@@ -11,6 +11,7 @@ from pathlib import Path
 from generate_report import ROOT, sources, validate_report, visible_markdown
 
 
+# Build an allowlisted archive and verify it from a clean extraction.
 def package(run_id):
     report = ROOT / 'report/project_report.md'
     metadata = json.loads((ROOT / 'report/source_manifest.json').read_text())
@@ -22,6 +23,8 @@ def package(run_id):
             raise ValueError('Documentation changed after report generation: ' + name)
     if hashlib.sha256(report.read_bytes()).hexdigest() != metadata['report_sha256']:
         raise ValueError('Report was changed after validation')
+
+    # Include authored source, documentation, figures, and compact run evidence.
     files = sources() + [ROOT / 'plan.md', ROOT / 'guide.md', report, ROOT / 'report/source_manifest.json']
     files += sorted((ROOT / 'docs').glob('*.md'))
     files += sorted((ROOT / 'report/figures' / run_id).glob('*'))
@@ -54,6 +57,8 @@ def package(run_id):
     if archive_path.exists():
         raise ValueError('Submission archive already exists; move it aside before rebuilding')
     inventory = {}
+
+    # Preserve relative paths while hashing the exact bytes placed in the ZIP.
     with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(set(files + evidence)):
             if path.is_symlink() or not path.is_file():
@@ -65,6 +70,8 @@ def package(run_id):
             archive.writestr('airline/' + relative, data)
             inventory[relative] = hashlib.sha256(data).hexdigest()
         archive.writestr('airline/SUBMISSION_MANIFEST.json', json.dumps(dict(run_id=run_id, sha256=inventory), indent=2) + '\n')
+
+    # Re-extract, verify every hash and link, then run portable unit tests.
     with tempfile.TemporaryDirectory() as directory, zipfile.ZipFile(archive_path) as archive:
         archive.extractall(directory)
         extracted = Path(directory) / 'airline'

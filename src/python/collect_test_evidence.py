@@ -5,6 +5,7 @@ import json
 from analyze_results import ROOT, analyze
 
 
+# Revalidate one fixture run and collect only compact correctness evidence.
 def collect(run_id):
     folder = ROOT / 'artifacts' / run_id
     manifest = json.loads((folder / 'run_manifest.json').read_text())

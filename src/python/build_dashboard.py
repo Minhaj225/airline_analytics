@@ -10,22 +10,26 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 
+# Load trusted local JSON metadata for the selected run.
 def read_json(path):
     with path.open(encoding="utf-8") as stream:
         return json.load(stream)
 
 
+# Load exported CSV tables while preserving their textual field values.
 def read_csv(path):
     with path.open(newline="", encoding="utf-8") as stream:
         return list(csv.DictReader(stream))
 
 
+# Prevent accidental mixing of evidence from different pipeline executions.
 def require_run_id(document, run_id, source):
     observed = document.get("run_id")
     if observed != run_id:
         raise ValueError(f"Mixed run IDs in {source}: expected {run_id}, found {observed}")
 
 
+# Normalize Spark-exported numeric strings for JSON serialization.
 def as_int(value):
     return int(float(value))
 
@@ -34,6 +38,7 @@ def as_float(value):
     return float(value)
 
 
+# Assemble a small, browser-ready payload from validated run artifacts.
 def build_payload(run_id):
     artifact = ROOT / "artifacts" / run_id
     exported = ROOT / "data" / "exported" / run_id
@@ -57,6 +62,7 @@ def build_payload(run_id):
     if manifest.get("status") != "validated" or not validation.get("passed") or not analysis.get("passed"):
         raise ValueError("Dashboard generation is limited to fully validated runs")
 
+    # Read only bounded aggregate outputs; raw flight rows never enter the dashboard.
     cleaning = sorted(
         read_csv(exported / "audit" / "cleaning_funnel.csv"),
         key=lambda row: as_int(row["step"]),
@@ -67,6 +73,8 @@ def build_payload(run_id):
 
     airport_by_iata = {row["iata"]: row for row in airports}
     top_airports = []
+
+    # Enrich the top weighted ranks with human-readable airport metrics.
     for rank in metrics["top_weighted"][:10]:
         airport = airport_by_iata[rank["iata"]]
         top_airports.append(
@@ -96,6 +104,7 @@ def build_payload(run_id):
     ]
     delay_routes.sort(key=lambda row: (-row["avg_delay"], row["origin"], row["destination"]))
 
+    # Verify every referenced figure before exposing it to the browser.
     figures = []
     for figure in figure_manifest["figures"]:
         figure_path = figures_root / Path(figure["file"]).name
@@ -194,6 +203,7 @@ def build_payload(run_id):
     }
 
 
+# Parse the requested run, serialize the payload, and write the JavaScript file.
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-id", default="full-2015-final-001")
@@ -203,7 +213,10 @@ def main():
     payload = build_payload(args.run_id)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     serialized = json.dumps(payload, indent=2, allow_nan=False)
-    args.output.write_text(f"window.DASHBOARD_DATA = {serialized};\n", encoding="utf-8")
+    args.output.write_text(
+        f"// Generated, read-only payload for the validated dashboard run.\nwindow.DASHBOARD_DATA = {serialized};\n",
+        encoding="utf-8",
+    )
     print(f"Dashboard payload written to {args.output}")
 
 

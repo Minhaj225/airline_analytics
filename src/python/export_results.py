@@ -8,6 +8,7 @@ import subprocess
 from pathlib import Path
 
 
+# Merge multipart Spark output while enforcing one consistent CSV header.
 def merge_parts(source, target):
     parts = sorted(source.glob('part-*.csv'))
     if not parts:
@@ -32,6 +33,7 @@ def merge_parts(source, target):
         raise ValueError(f'Missing headers: {source}')
 
 
+# Export every available result table and record hashes for later validation.
 def main():
     root = Path(os.environ['PROJECT_ROOT'])
     artifact = Path(os.environ['ARTIFACT_DIR'])
@@ -42,6 +44,7 @@ def main():
     if output.exists():
         raise ValueError('Export already exists; refusing overwrite')
     if config['STORAGE'] == 'hdfs':
+        # Download only the run-owned result directories from HDFS.
         source = artifact / 'downloaded-store'
         source.mkdir()
         for name in ('csv', 'metrics', 'validation', 'tests'):
@@ -53,6 +56,8 @@ def main():
     validation = json.loads((source / 'validation/validation.json').read_text())
     if validation['run_id'] != run or not validation['passed']:
         raise ValueError('Saved output validation missing or failed')
+
+    # Merge every leaf CSV directory into one portable file.
     for directory in sorted((source / 'csv').rglob('*')):
         if directory.is_dir() and list(directory.glob('part-*.csv')):
             merge_parts(directory, output / directory.relative_to(source / 'csv').with_suffix('.csv'))
@@ -64,6 +69,8 @@ def main():
     shutil.copyfile(source / 'validation/validation.json', artifact / 'validation.json')
     if config['MODE'] == 'fixture':
         shutil.copyfile(source / 'tests/graph_correctness.json', artifact / 'graph_correctness.json')
+
+    # Bind every exported table to its exact bytes in a selected-run manifest.
     hashes = {str(p.relative_to(output)): hashlib.sha256(p.read_bytes()).hexdigest()
               for p in sorted(output.rglob('*.csv'))}
     (output / 'export_manifest.json').write_text(json.dumps({'run_id': run, 'mode': config['MODE'], 'sha256': hashes}, indent=2) + '\n')

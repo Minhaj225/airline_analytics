@@ -1,10 +1,7 @@
-# Dataset provenance — acquired 13 October 2026
+# Dataset provenance
 
 Source: [2015 Flight Delays and Cancellations](https://www.kaggle.com/datasets/usdot/flight-delays), published by Department of Transportation. Dataset ID 810, version 1; publisher update 2017-02-09T21:36:00.933Z.
 
-Acquired at 2026-10-13T16:51:32.310626+00:00; inspected at 2026-10-13T16:52:01.121476+00:00. Method: Public Kaggle download endpoint; no credentials required for this retrieval. The [publisher metadata](https://www.kaggle.com/api/v1/datasets/view/usdot/flight-delays) reports **CC0: Public Domain**. Raw CSVs and the archive are excluded from the submission.
-
-Archive: 200,067,268 bytes; SHA-256 `112a41f4e1a5300f570fb0eec5ba5fd11965bcdf67be9431179bb011f3493c14`. ZIP CRC and exact three-file inventory passed before extraction.
 
 | File | Bytes | Parsed records | Width mismatches | SHA-256 |
 | --- | --- | --- | --- | --- |

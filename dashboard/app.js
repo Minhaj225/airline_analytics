@@ -1,18 +1,22 @@
+// Render one validated, prebuilt payload without making network requests.
 (() => {
   "use strict";
 
+  // Stop with a visible explanation if the generated data file was not loaded.
   const data = window.DASHBOARD_DATA;
   if (!data) {
     document.body.innerHTML = '<main class="load-error"><h1>Dashboard data is missing.</h1><p>Run the dashboard builder, then reload this page.</p></main>';
     return;
   }
 
+  // Formatting helpers keep labels and metrics consistent across sections.
   const el = (id) => document.getElementById(id);
   const formatInt = (value) => new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(value);
   const formatPct = (value, digits = 1) => new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDigits: digits }).format(value);
   const formatFloat = (value, digits = 2) => new Intl.NumberFormat("en-US", { maximumFractionDigits: digits, minimumFractionDigits: digits }).format(value);
   const setText = (id, value) => { el(id).textContent = value; };
 
+  // Fill fixed run metadata and headline metrics first.
   setText("run-status", `${data.run.status.toUpperCase()} / ${data.run.id}`);
   setText("sidebar-run", data.run.id);
   setText("dataset-id", data.run.dataset_id);
@@ -33,6 +37,7 @@
   setText("validation-summary", `${data.validation.saved_output_checks} Scala saved-output checks and ${data.validation.export_checks} export integrity checks passed for this run.`);
   setText("generated-at", `Payload generated ${new Date(data.generated_at).toLocaleString()}`);
 
+  // Build the mutually exclusive cleaning funnel.
   const cleaningList = el("cleaning-list");
   data.cleaning.filter((row) => row.records > 0).forEach((row) => {
     const line = document.createElement("div");
@@ -42,6 +47,7 @@
     cleaningList.appendChild(line);
   });
 
+  // Compare raw and retained coverage month by month.
   const monthlyChart = el("monthly-chart");
   const maxMonthly = Math.max(...data.monthly.map((month) => month.raw_records));
   data.monthly.forEach((month) => {
@@ -52,6 +58,7 @@
     monthlyChart.appendChild(item);
   });
 
+  // Scale centrality bars relative to the highest-ranked airport.
   const rankingChart = el("ranking-chart");
   const maxScore = data.top_airports[0].score;
   data.top_airports.forEach((airport) => {
@@ -62,6 +69,7 @@
     rankingChart.appendChild(row);
   });
 
+  // Summarize directed reachability toward each selected hub.
   const hubGrid = el("hub-grid");
   Object.entries(data.reachability).forEach(([hub, reach]) => {
     const card = document.createElement("article");
@@ -70,6 +78,7 @@
     hubGrid.appendChild(card);
   });
 
+  // Populate delay, validation, timing, figure, and limitation sections.
   const delayRoutes = el("delay-routes");
   data.delay.highest_routes.forEach((route) => {
     const row = document.createElement("tr");
@@ -112,6 +121,7 @@
   const links = [...document.querySelectorAll(".sidebar nav a")];
   const sections = links.map((link) => document.querySelector(link.getAttribute("href"))).filter(Boolean);
 
+  // Keep navigation state synchronized with the reader's current section.
   const setActiveLink = (sectionId) => {
     links.forEach((link) => link.classList.toggle("active", link.getAttribute("href") === `#${sectionId}`));
   };

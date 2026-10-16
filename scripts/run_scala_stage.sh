@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Compile and execute one isolated Spark stage with run-specific completion checks.
 set -euo pipefail
 stage=${1:?Usage: run_scala_stage.sh STAGE [configuration flags]}
 shift
@@ -7,6 +8,8 @@ source "$(dirname "$0")/common.sh" "$@"
 need spark-shell
 mkdir -p "$ARTIFACT_DIR/logs"
 [[ ! -e "$ARTIFACT_DIR/$stage.complete" && ! -e "$ARTIFACT_DIR/logs/$stage.log" ]] || die "Stage already attempted for $RUN_ID; use a fresh run ID"
+
+# Refuse stale local or HDFS markers before invoking Spark.
 if [[ "$STORAGE" == hdfs ]]; then
   [[ $(hdfs getconf -confKey fs.defaultFS) == hdfs://* ]] || die 'Expected HDFS default filesystem'
   if hdfs dfs -test -e "$RUN_URI/markers/$stage.json"; then die 'Stale remote stage marker; use a fresh run ID'; fi
@@ -14,6 +17,8 @@ else
   [[ ! -e "$ARTIFACT_DIR/local-store/markers/$stage.json" ]] || die 'Stale local stage marker'
 fi
 input="$ARTIFACT_DIR/$stage.repl"
+
+# Assemble one REPL compilation unit so partial definitions cannot survive errors.
 python3 - "$stage" "$input" <<'PY'
 import os, sys
 from pathlib import Path
@@ -28,11 +33,15 @@ source = Path(sys.argv[2]).with_suffix('.scala')
 source.write_text(code)
 Path(sys.argv[2]).write_text(':paste ' + str(source) + '\n' + call + '\n:quit\n')
 PY
+
+# Capture both the Spark transcript and wall time including REPL startup.
 started=$SECONDS
 spark-shell --master "$SPARK_MASTER" --driver-memory "$DRIVER_MEMORY" \
   --conf spark.ui.enabled=false --conf spark.sql.warehouse.dir="$ARTIFACT_DIR/warehouse" \
   < "$input" 2>&1 | tee "$ARTIFACT_DIR/logs/$stage.log"
 elapsed=$((SECONDS - started))
+
+# Require both a clean transcript and the exact run-specific success message.
 if grep -Eq '(^|[[:space:]])error:|[0-9]+ errors? found|org.apache.spark.SparkException:' "$ARTIFACT_DIR/logs/$stage.log"; then die 'Spark reported a compilation or execution failure'; fi
 grep -Fxq "AIRLINE_STAGE_OK:$RUN_ID:$stage" "$ARTIFACT_DIR/logs/$stage.log" || die 'Run-specific completion message missing'
 if [[ "$STORAGE" == hdfs ]]; then
@@ -40,6 +49,8 @@ if [[ "$STORAGE" == hdfs ]]; then
 else
   cp "$ARTIFACT_DIR/local-store/markers/$stage.json" "$ARTIFACT_DIR/$stage.complete"
 fi
+
+# Verify and enrich the persisted stage marker with wrapper wall time.
 python3 - "$ARTIFACT_DIR/$stage.complete" "$RUN_ID" "$stage" "$elapsed" <<'PY'
 import json, sys
 from pathlib import Path

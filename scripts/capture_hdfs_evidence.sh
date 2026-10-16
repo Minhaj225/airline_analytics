@@ -2,6 +2,8 @@
 # Capture health and output placement for a completed HDFS run.
 source "$(dirname "$0")/common.sh" "$@"
 [[ "$STORAGE" == hdfs && -f "$ARTIFACT_DIR/run_manifest.json" ]] || die 'Select an existing HDFS run'
+
+# Confirm the selected manifest belongs to a validated HDFS execution.
 python3 - "$ARTIFACT_DIR/run_manifest.json" "$RUN_ID" "$DATASET_ID" <<'PY'
 import json, sys
 manifest = json.load(open(sys.argv[1]))
@@ -9,6 +11,8 @@ assert manifest['run_id'] == sys.argv[2] and manifest['status'] == 'validated'
 assert manifest['configuration']['DATASET_ID'] == sys.argv[3]
 assert manifest['configuration']['STORAGE'] == 'hdfs'
 PY
+
+# Capture storage placement, filesystem health, and the JVM behind each daemon.
 {
   date -u +%FT%TZ
   hdfs getconf -confKey fs.defaultFS
@@ -20,6 +24,8 @@ PY
   "$HADOOP_JAVA_HOME/bin/java" -version 2>&1
   python3 - <<'PY'
 from pathlib import Path
+
+# Inspect /proc directly so evidence names the executable used by each daemon.
 for process in Path('/proc').iterdir():
     if not process.name.isdigit():
         continue

@@ -1,3 +1,4 @@
+"""Unit tests for independent oracles, export merging, and report integrity."""
 import csv
 import json
 import sys
@@ -18,6 +19,7 @@ import analyze_results
 from acquire_dataset import acquire
 
 
+# Group fast, local correctness checks that do not require a Spark runtime.
 class CorrectnessTests(unittest.TestCase):
     def test_correlations_use_average_tied_ranks(self):
         self.assertEqual(average_ranks([7, 3, 7, 9]), [2.5, 1, 2.5, 4])

@@ -1,14 +1,15 @@
+// Generated, read-only payload for the validated dashboard run.
 window.DASHBOARD_DATA = {
-  "generated_at": "2026-10-15T07:08:09.669337+00:00",
+  "generated_at": "2026-10-16T17:43:09.760812+00:00",
   "run": {
-    "id": "full-2015-final-001",
+    "id": "full-2015-final-002",
     "mode": "full",
     "storage": "hdfs",
     "dataset_id": "usdot-2015-v1",
     "status": "validated",
     "spark_master": "local[2]",
     "graph_partitions": 4,
-    "started_at": "2026-10-13T16:58:15.324460+00:00"
+    "started_at": "2026-10-14T04:11:35.238740+00:00"
   },
   "summary": {
     "raw_records": 5819079,
@@ -382,73 +383,73 @@ window.DASHBOARD_DATA = {
     {
       "name": "analytics",
       "status": "complete",
-      "wall_seconds": 52,
-      "materialized_seconds": 39.732363202
+      "wall_seconds": 55,
+      "materialized_seconds": 40.88671593
     },
     {
       "name": "preprocess",
       "status": "complete",
-      "wall_seconds": 152,
-      "materialized_seconds": 139.319272724
+      "wall_seconds": 163,
+      "materialized_seconds": 148.657451457
     },
     {
       "name": "smoke",
       "status": "complete",
-      "wall_seconds": 15,
-      "materialized_seconds": 2.988209956
+      "wall_seconds": 14,
+      "materialized_seconds": 3.190428742
     },
     {
       "name": "validate",
       "status": "complete",
-      "wall_seconds": 21,
-      "materialized_seconds": 10.221631826
+      "wall_seconds": 22,
+      "materialized_seconds": 10.522853349
     }
   ],
   "algorithms": [
     {
       "name": "pagerank",
-      "compute_seconds": 2.647904391,
-      "write_seconds": 0.951851523
+      "compute_seconds": 2.108954325,
+      "write_seconds": 0.861772661
     },
     {
       "name": "weighted pagerank",
-      "compute_seconds": 0.233251322,
-      "write_seconds": 0.972805794
+      "compute_seconds": 0.33025232,
+      "write_seconds": 1.038893549
     },
     {
       "name": "uniform pagerank",
-      "compute_seconds": 0.191907187,
-      "write_seconds": 0.960845763
+      "compute_seconds": 0.184900112,
+      "write_seconds": 0.946865175
     },
     {
       "name": "connected components",
-      "compute_seconds": 0.371682884,
-      "write_seconds": 0.9609278
+      "compute_seconds": 0.360197771,
+      "write_seconds": 0.958078439
     },
     {
       "name": "component sizes",
-      "compute_seconds": 0.292375258,
-      "write_seconds": 0.97368337
+      "compute_seconds": 0.256737105,
+      "write_seconds": 0.974154063
     },
     {
       "name": "triangle count",
-      "compute_seconds": 0.423355517,
-      "write_seconds": 1.849598332
+      "compute_seconds": 0.418890402,
+      "write_seconds": 1.861204044
     },
     {
       "name": "shortest paths",
-      "compute_seconds": 0.387191399,
-      "write_seconds": 0.957208951
+      "compute_seconds": 0.39460633,
+      "write_seconds": 0.990235819
     },
     {
       "name": "airport metrics",
-      "compute_seconds": 0.38374991,
-      "write_seconds": 0.991499501
+      "compute_seconds": 0.500603353,
+      "write_seconds": 1.019938874
     },
     {
       "name": "route metrics",
-      "compute_seconds": 0.083122348,
-      "write_seconds": 0.606711128
+      "compute_seconds": 0.102242286,
+      "write_seconds": 1.025475549
     }
   ],
   "validation": {
@@ -585,55 +586,55 @@ window.DASHBOARD_DATA = {
   "figures": [
     {
       "title": "Cleaning decisions and retained records",
-      "src": "../report/figures/full-2015-final-001/cleaning.png"
+      "src": "../report/figures/full-2015-final-002/cleaning.png"
     },
     {
       "title": "Monthly retention and numeric-ID exclusions",
-      "src": "../report/figures/full-2015-final-001/monthly.png"
+      "src": "../report/figures/full-2015-final-002/monthly.png"
     },
     {
       "title": "Topology, traffic-weighted, and uniform PageRank",
-      "src": "../report/figures/full-2015-final-001/pagerank.png"
+      "src": "../report/figures/full-2015-final-002/pagerank.png"
     },
     {
       "title": "Incoming traffic and weighted centrality",
-      "src": "../report/figures/full-2015-final-001/strength.png"
+      "src": "../report/figures/full-2015-final-002/strength.png"
     },
     {
       "title": "Distribution of distinct route connections",
-      "src": "../report/figures/full-2015-final-001/degree_distribution.png"
+      "src": "../report/figures/full-2015-final-002/degree_distribution.png"
     },
     {
       "title": "Distribution of airport flight traffic",
-      "src": "../report/figures/full-2015-final-001/traffic_distribution.png"
+      "src": "../report/figures/full-2015-final-002/traffic_distribution.png"
     },
     {
       "title": "Local clustering and weak connectivity",
-      "src": "../report/figures/full-2015-final-001/clustering.png"
+      "src": "../report/figures/full-2015-final-002/clustering.png"
     },
     {
       "title": "Weak component size distribution",
-      "src": "../report/figures/full-2015-final-001/component_sizes.png"
+      "src": "../report/figures/full-2015-final-002/component_sizes.png"
     },
     {
       "title": "Airports with the most undirected triangles",
-      "src": "../report/figures/full-2015-final-001/triangles.png"
+      "src": "../report/figures/full-2015-final-002/triangles.png"
     },
     {
       "title": "Directed flight legs TO each landmark",
-      "src": "../report/figures/full-2015-final-001/reachability.png"
+      "src": "../report/figures/full-2015-final-002/reachability.png"
     },
     {
       "title": "Route delays: at least 100 flights",
-      "src": "../report/figures/full-2015-final-001/delay.png"
+      "src": "../report/figures/full-2015-final-002/delay.png"
     },
     {
       "title": "Airport centrality and observed arrival delay",
-      "src": "../report/figures/full-2015-final-001/delay_centrality.png"
+      "src": "../report/figures/full-2015-final-002/delay_centrality.png"
     },
     {
       "title": "Measured pipeline durations",
-      "src": "../report/figures/full-2015-final-001/timings.png"
+      "src": "../report/figures/full-2015-final-002/timings.png"
     }
   ],
   "limitations": [

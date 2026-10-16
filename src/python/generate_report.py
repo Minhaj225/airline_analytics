@@ -14,6 +14,7 @@ APPENDICES = ['Appendix A — Complete Reproduction Procedure',
               'Appendix D — Team Contributions and Demo', 'Appendix E — References']
 
 
+# Enumerate authored files that must appear verbatim in the report appendix.
 def sources():
     result = [ROOT / f for f in ('README.md', '.gitignore', 'requirements.txt')]
     for directory in ('scripts', 'src', 'tests', 'config'):
@@ -22,16 +23,19 @@ def sources():
     return sorted(result)
 
 
+# Choose a fence longer than any backtick run inside the embedded source.
 def fenced(text, language='text'):
     length = max([3] + [len(m) + 1 for m in re.findall(r'`+', text)])
     fence = '`' * length
     return f'{fence}{language}\n{text.rstrip()}\n{fence}\n'
 
 
+# Demote imported document headings so the six required sections stay top-level.
 def subordinate(text):
     return re.sub(r'(?m)^(#{1,5}) ', r'##\1 ', text)
 
 
+# Render dictionaries as a compact Markdown comparison table.
 def table(rows, columns):
     def cell(value):
         return str(value).replace('|', '\\|').replace('\n', ' ')
@@ -39,6 +43,7 @@ def table(rows, columns):
         '| ' + ' | '.join(cell(row.get(c, '')) for c in columns) + ' |\n' for row in rows)
 
 
+# Remove fenced listings before checking the visible report heading structure.
 def visible_markdown(text):
     output = []
     fence = None
@@ -56,6 +61,7 @@ def visible_markdown(text):
     return '\n'.join(output)
 
 
+# Verify section order, image links, source hashes, and complete source listings.
 def validate_report(path, inventory):
     text = path.read_text()
     visible = visible_markdown(text)
@@ -73,6 +79,7 @@ def validate_report(path, inventory):
             raise ValueError('Incomplete source listing: ' + name)
 
 
+# Assemble the selected-run narrative, evidence, appendices, and integrity manifest.
 def generate(run_id):
     analysis = analyze(run_id)
     artifact = ROOT / 'artifacts' / run_id
@@ -80,6 +87,8 @@ def generate(run_id):
     manifest = json.loads((artifact / 'run_manifest.json').read_text())
     if manifest['status'] != 'validated':
         raise ValueError('Cannot report an incompletely validated run')
+
+    # Require one internally consistent run across figures, metrics, and evidence.
     figures = json.loads((ROOT / 'report/figures' / run_id / 'manifest.json').read_text())
     etl = json.loads((artifact / 'etl.json').read_text())
     weighted = json.loads((artifact / 'weighted_pagerank.json').read_text())
@@ -107,6 +116,8 @@ def generate(run_id):
     numeric = next(int(r['records']) for r in read_csv(export / 'audit/cleaning_funnel.csv') if r['reason'] == 'numeric_airport')
     coverage = etl['delay_observations'] / etl['retained_records']
     mean = etl['sum_arrival_delay'] / etl['delay_observations'] if etl['delay_observations'] else None
+
+    # Build the report in required section order from validated measured values.
     parts = [f'Airline Graph Analytics — CSE412\n\nSelected run: `{run_id}`. **{scope}**\n\n']
     parts.append('# Introduction\n\n' +
         'This project implements the data preparation and graph-analysis stages of an airline network study. '
@@ -206,6 +217,8 @@ def generate(run_id):
         'a verified date-specific numeric-ID crosswalk, temporal networks, community detection, weather-adjusted delay models, '
         'and a multi-node evaluation. Replace the editable member names before submission; equal contributions were requested by the team.\n\n')
     parts.append('# ' + APPENDICES[0] + '\n\n' + subordinate((ROOT / 'README.md').read_text()) + '\n')
+
+    # Bind the complete source appendix to hashes calculated during this build.
     inventory = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources()}
     parts.append('# ' + APPENDICES[1] + '\n\n' + table([dict(file=k, sha256=v) for k, v in inventory.items()], ['file', 'sha256']) + '\n')
     for name in inventory:
@@ -231,6 +244,8 @@ def generate(run_id):
     report = ROOT / 'report/project_report.md'
     report.write_text(''.join(parts))
     validate_report(report, inventory)
+
+    # Record source, documentation, and final-report hashes for packaging checks.
     documents = sorted((ROOT / 'docs').glob('*.md')) + [ROOT / 'guide.md', ROOT / 'plan.md']
     document_hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in documents}
     (report.parent / 'source_manifest.json').write_text(json.dumps(dict(run_id=run_id, source_sha256=inventory, document_sha256=document_hashes,

@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
+# Record software, hardware, filesystem, and HDFS readiness for one run.
 source "$(dirname "$0")/common.sh" "$@"
 mkdir -p "$ARTIFACT_DIR"
 failed=0
+
+# Run a diagnostic without hiding later checks when one command fails.
 probe() { echo; echo "> $*"; "$@" || { echo "FAILED: $*"; failed=1; }; }
+
+# Keep the complete probe transcript as reproducible environment evidence.
 {
   date -u +%FT%TZ
   uname -a

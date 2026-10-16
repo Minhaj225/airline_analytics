@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="Validated results dashboard for the airline graph analytics pipeline." />
+    <title>Airline Graph Analytics | Results Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="data.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to results</a>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">AG</span>
+        <div>
+          <strong>Airline Graph Analytics</strong>
+          <span>HDFS + Spark SQL + GraphX</span>
+        </div>
+      </div>
+      <div class="run-state" aria-label="Selected run state">
+        <span class="status-indicator" aria-hidden="true"></span>
+        <span id="run-status">Loading validated run</span>
+      </div>
+    </header>
+
+    <div class="shell">
+      <aside class="sidebar" aria-label="Dashboard sections">
+        <nav>
+          <a class="active" href="#overview">Overview</a>
+          <a href="#cleaning">Data quality</a>
+          <a href="#centrality">Centrality</a>
+          <a href="#connectivity">Connectivity</a>
+          <a href="#delay">Delay</a>
+          <a href="#validation">Validation</a>
+          <a href="#figures">Figures</a>
+          <a href="#limitations">Limitations</a>
+        </nav>
+        <div class="sidebar-note">
+          <span>Selected run</span>
+          <strong id="sidebar-run">...</strong>
+          <small>Read-only measured output</small>
+        </div>
+      </aside>
+
+      <main id="main">
+        <section id="overview" class="section intro">
+          <div class="intro-copy">
+            <p class="eyebrow">Validated real-data run</p>
+            <h1>Airline network analysis from 5.8 million flight records.</h1>
+            <p id="intro-summary">Loading measured run output.</p>
+          </div>
+          <div class="run-card" aria-label="Run configuration">
+            <div><span>Dataset</span><strong id="dataset-id">...</strong></div>
+            <div><span>Storage</span><strong id="storage">...</strong></div>
+            <div><span>Spark master</span><strong id="spark-master">...</strong></div>
+            <div><span>Run mode</span><strong id="run-mode">...</strong></div>
+          </div>
+        </section>
+
+        <section class="metric-grid" aria-label="Key pipeline metrics">
+          <article><span>Raw flights</span><strong id="raw-records">...</strong><small>source records</small></article>
+          <article><span>Retained</span><strong id="retained-records">...</strong><small id="retention">after cleaning</small></article>
+          <article><span>Airports</span><strong id="airports">...</strong><small>active vertices</small></article>
+          <article><span>Routes</span><strong id="routes">...</strong><small>directed edges</small></article>
+        </section>
+
+        <section id="cleaning" class="section two-column">
+          <div>
+            <p class="section-index">Data quality</p>
+            <h2>Data cleaning and retention</h2>
+            <p>Every exclusion is assigned to one step. October is intentionally visible as a coverage gap.</p>
+            <div id="cleaning-list" class="funnel-list" aria-label="Cleaning funnel"></div>
+          </div>
+          <div class="panel chart-panel">
+            <div class="panel-heading">
+              <div><span>Monthly coverage</span><strong>Raw versus retained records</strong></div>
+              <span class="legend"><i></i> retained</span>
+            </div>
+            <div id="monthly-chart" class="monthly-chart" role="img" aria-label="Monthly raw and retained flight records"></div>
+          </div>
+        </section>
+
+        <section id="centrality" class="section">
+          <div class="section-heading">
+            <p class="section-index">Centrality</p>
+            <h2>Traffic-weighted airport centrality</h2>
+            <p id="rank-comparison"></p>
+          </div>
+          <div class="panel ranking-panel">
+            <div class="panel-heading">
+              <div><span>Traffic-weighted PageRank</span><strong>Top ten airports</strong></div>
+              <span>score normalized to 1</span>
+            </div>
+            <div id="ranking-chart" class="ranking-chart"></div>
+          </div>
+        </section>
+
+        <section id="connectivity" class="section two-column connectivity-layout">
+          <div class="connectivity-copy">
+            <p class="section-index">Connectivity</p>
+            <h2>Network connectivity and hub reachability</h2>
+            <div class="inline-stats">
+              <div><strong id="components">...</strong><span>weak component</span></div>
+              <div><strong id="triangles">...</strong><span>undirected triangles</span></div>
+            </div>
+            <p>Directed distances answer a different question: how many observed flight legs are needed to reach each hub?</p>
+          </div>
+          <div id="hub-grid" class="hub-grid" aria-label="Hub reachability"></div>
+        </section>
+
+        <section id="delay" class="section">
+          <div class="section-heading">
+            <p class="section-index">Delay</p>
+            <h2>Centrality and arrival delay</h2>
+            <p id="delay-summary"></p>
+          </div>
+          <div class="panel table-panel">
+            <div class="panel-heading">
+              <div><span>Descriptive route analysis</span><strong id="route-table-title">Highest average delays</strong></div>
+              <span>measured retained flights</span>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>Route</th><th>Flights</th><th>Avg delay</th><th>15+ min share</th></tr></thead>
+                <tbody id="delay-routes"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="validation" class="section two-column validation-layout">
+          <div>
+            <p class="section-index">Validation</p>
+            <h2>Validation of persisted results</h2>
+            <p id="validation-summary"></p>
+            <details>
+              <summary>Inspect saved-output checks</summary>
+              <div id="validation-checks" class="check-list"></div>
+            </details>
+          </div>
+          <div class="panel">
+            <div class="panel-heading">
+              <div><span>Observed on one machine</span><strong>Pipeline stage time</strong></div>
+              <span>seconds</span>
+            </div>
+            <div id="stage-chart" class="stage-chart"></div>
+          </div>
+        </section>
+
+        <section id="figures" class="section">
+          <div class="section-heading">
+            <p class="section-index">Evidence gallery</p>
+            <h2>Results and visual evidence</h2>
+          </div>
+          <div id="figure-gallery" class="figure-gallery"></div>
+        </section>
+
+        <section id="limitations" class="section limitation-section">
+          <div>
+            <p class="section-index">Interpretation boundary</p>
+            <h2>Scope and limitations</h2>
+          </div>
+          <ul id="limitations-list"></ul>
+        </section>
+
+        <footer>
+          <span>Airline Graph Analytics</span>
+          <span id="generated-at">Dashboard payload not loaded</span>
+        </footer>
+      </main>
+    </div>
+
+    <noscript>This dashboard needs JavaScript enabled to render the generated run payload.</noscript>
+  </body>
+</html>

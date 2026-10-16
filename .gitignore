@@ -11,6 +11,3 @@ metastore_db/
 derby.log
 spark-warehouse/
 .runtime/
-guide.md
-plan.md
-READMEpersonal.md
